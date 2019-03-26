@@ -1,4 +1,4 @@
-package jp.co.nri.nefs.tool.smartlauncher;
+package jp.co.nri.nefs.tool.smartlauncher.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,16 +14,16 @@ import java.util.stream.Collectors;
 public class FileListCreator {
 
 	private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-	private SmartFrame frame;
+	private DataModelUpdater dataModelUpdater;
 	private Path directoryFile;
 
-	public FileListCreator(SmartFrame frame, Path directoryFile) {
-		this.frame = frame;
+	public FileListCreator(DataModelUpdater dataModelUpdater, Path directoryFile) {
+		this.dataModelUpdater = dataModelUpdater;
 		this.directoryFile = directoryFile;
 
 	}
 
-	private List<File> createList(Path directoryFile) throws IOException{
+	public List<File> createList() throws IOException{
 		return Files.readAllLines(directoryFile).stream()
 				.map(File::new)
 				.flatMap(dir ->
@@ -34,15 +34,15 @@ public class FileListCreator {
 	public void start(){
 		Runnable r = () -> {
 			try {
-				List<File> newList = createList(directoryFile);
+				List<File> newList = createList();
 				//newList.forEach(System.out::println);
-				frame.replaceList(newList);
+				dataModelUpdater.replaceList(newList);
 			} catch (IOException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 		};
-		executor.	scheduleAtFixedRate(r, 0, 5, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(r, 0, 5, TimeUnit.SECONDS);
 	}
 
 	public void stop() {
