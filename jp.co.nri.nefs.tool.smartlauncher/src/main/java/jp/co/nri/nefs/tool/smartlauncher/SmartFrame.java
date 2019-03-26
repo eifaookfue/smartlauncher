@@ -13,7 +13,6 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -47,10 +46,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.lang.StringUtils;
 
-/**
- * Hello world!
- *
- */
+
 public class SmartFrame extends JFrame
 {
 	private FileListCreator creator;
@@ -59,7 +55,7 @@ public class SmartFrame extends JFrame
 	public SmartFrame() {
 		this.fileList = new ArrayList<>();
 		//files = Arrays.stream(dir.listFiles(f -> f.isFile())).collect(Collectors.toList());
-        Path directoryFile = Paths.get("C:\\pleiades\\workspace\\jp.co.nri.nefs.tool.launcher\\conf\\searchdir.txt");
+        Path directoryFile = Paths.get("C:\\Users\\s2-nakamura\\git\\smartlauncher\\jp.co.nri.nefs.tool.smartlauncher\\conf\\searchdir.txt");
         creator = new FileListCreator(this, directoryFile);
         creator.start();
 	}
@@ -153,7 +149,7 @@ public class SmartFrame extends JFrame
 			int columnIndex = table.getSelectedColumn();
 			File f = (File)table.getModel().getValueAt(rowIndex, columnIndex);
 
-	    	ProcessBuilder pb = new ProcessBuilder("cscript", "C:\\pleiades\\workspace\\jp.co.nri.nefs.tool.launcher\\conf\\activate.vbs", f.getPath());
+	    	ProcessBuilder pb = new ProcessBuilder("cscript", "C:\\Users\\s2-nakamura\\git\\smartlauncher\\jp.co.nri.nefs.tool.smartlauncher\\conf\\activate.vbs", f.getPath());
 	    	pb.command().stream().map(s -> s + " ").forEach(System.out::print);
 	    	System.out.println();
 	    	try {
@@ -234,29 +230,6 @@ public class SmartFrame extends JFrame
 		//table.getActionMap().put(solve, new EnterAction(table));
 
 		JTextField textField = new JTextField(10);
-
-
-
-		textField.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO 自動生成されたメソッド・スタブ
-
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO 自動生成されたメソッド・スタブ
-
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				// TODO 自動生成されたメソッド・スタブ
-
-			}
-		});
 
 		// 2行目
 		JLabel c2 = new JLabel(" ");
@@ -400,8 +373,6 @@ public class SmartFrame extends JFrame
 
     public static void main( String[] args )
     {
-
-
         SmartFrame frame = new SmartFrame();
         frame.init();
         frame.pack();
