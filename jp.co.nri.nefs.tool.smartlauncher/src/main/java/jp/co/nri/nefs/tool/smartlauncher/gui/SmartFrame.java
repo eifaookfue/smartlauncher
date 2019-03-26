@@ -38,6 +38,9 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.JIntellitype;
+
 import jp.co.nri.nefs.tool.smartlauncher.action.ExecuteAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ShiftTabAction;
 import jp.co.nri.nefs.tool.smartlauncher.data.DataModelUpdater;
@@ -251,6 +254,7 @@ public class SmartFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				creator.stop();
 				tray.remove(icon);
+				JIntellitype.getInstance().cleanUp();
 				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				dispose();
 			}
@@ -270,6 +274,22 @@ public class SmartFrame extends JFrame {
 		SmartFrame frame = new SmartFrame();
 		frame.init();
 		frame.pack();
+
+
+		JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_SHIFT, (int)'B');
+		JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
+
+			@Override
+			public void onHotKey(int paramInt) {
+				if (paramInt == 1){
+					frame.setVisible(true);
+					System.out.println("called");
+				}
+
+			}
+		});
+
 		frame.setVisible(true);
+
 	}
 }
