@@ -24,7 +24,7 @@ public class ExecuteAction extends AbstractAction {
 		ProcessBuilder pb = new ProcessBuilder("cscript",
 				"C:\\Users\\s2-nakamura\\git\\smartlauncher\\jp.co.nri.nefs.tool.smartlauncher\\conf\\activate.vbs",
 				f.getPath());
-		pb.command().stream().map(s -> s + " ").forEach(System.out::print);
+		//pb.command().stream().collect(Collectors.joining(" "));
 		System.out.println();
 		try {
 			pb.start();

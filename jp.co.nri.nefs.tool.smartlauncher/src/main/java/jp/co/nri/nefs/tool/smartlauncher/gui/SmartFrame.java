@@ -47,6 +47,7 @@ import jp.co.nri.nefs.tool.smartlauncher.data.DataModelUpdater;
 import jp.co.nri.nefs.tool.smartlauncher.data.FileListCreator;
 
 public class SmartFrame extends JFrame {
+	private Image image;
 	private FileListCreator creator;
 	private Path directoryFile;
 
@@ -55,9 +56,8 @@ public class SmartFrame extends JFrame {
 				"C:\\Users\\s2-nakamura\\git\\smartlauncher\\jp.co.nri.nefs.tool.smartlauncher\\conf\\searchdir.txt");
 	}
 
-
-
 	private void init() {
+		initIcon();
 		initFont();
 		initCloseOperation();
 		initTitle();
@@ -65,6 +65,15 @@ public class SmartFrame extends JFrame {
 		initSizeAndLocation();
 		initSelection(table);
 		initTaskTray();
+	}
+
+	private void initIcon() {
+		try {
+			image = ImageIO.read(SmartFrame.class.getClassLoader().getResourceAsStream("launcher-icon.png"));
+			setIconImage(image);
+		} catch (IOException e) {
+			throw new ExceptionInInitializerError(e);
+		}
 	}
 
 	private void initFont() {
@@ -228,13 +237,6 @@ public class SmartFrame extends JFrame {
 		SystemTray tray = SystemTray.getSystemTray();
 		PopupMenu popup = new PopupMenu();
 
-		Image image = null;
-		try {
-			image = ImageIO.read(SmartFrame.class.getClassLoader().getResourceAsStream("icon.png"));
-		} catch (IOException e1) {
-			// TODO 自動生成された catch ブロック
-			e1.printStackTrace();
-		}
 		TrayIcon icon = new TrayIcon(image, "SmartLauncher", popup);
 		icon.setImageAutoSize(true);
 
@@ -276,7 +278,8 @@ public class SmartFrame extends JFrame {
 		frame.pack();
 
 
-		JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_SHIFT, (int)'B');
+		//JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_SHIFT, (int)'B');
+		JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_SHIFT, KeyEvent.VK_5);
 		JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
 
 			@Override
@@ -289,7 +292,7 @@ public class SmartFrame extends JFrame {
 			}
 		});
 
-		frame.setVisible(true);
+		//frame.setVisible(true);
 
 	}
 }
