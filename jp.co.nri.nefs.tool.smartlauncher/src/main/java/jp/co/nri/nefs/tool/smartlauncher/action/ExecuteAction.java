@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import javax.swing.JTable;
 
 import org.slf4j.Logger;
@@ -14,10 +15,12 @@ import org.slf4j.LoggerFactory;
 
 public class ExecuteAction extends AbstractAction {
 
+	private JFrame frame;
 	private JTable table;
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	public ExecuteAction(JTable table) {
+	public ExecuteAction(JFrame frame, JTable table) {
+		this.frame = frame;
 		this.table = table;
 	}
 
@@ -38,6 +41,7 @@ public class ExecuteAction extends AbstractAction {
 		} catch (IOException ie) {
 			logger.warn("process起動失敗", ie);
 		}
+		frame.setVisible(false);
 	}
 
 

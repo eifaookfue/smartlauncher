@@ -151,7 +151,7 @@ public class SmartFrame extends JFrame {
 		final String solve = "Solve";
 		KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-		table.getActionMap().put(solve, new ExecuteAction(table));
+		table.getActionMap().put(solve, new ExecuteAction(this, table));
 		KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK);
 		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(tab, "TTT");
 		table.getActionMap().put("TTT", new ShiftTabAction(textField));
