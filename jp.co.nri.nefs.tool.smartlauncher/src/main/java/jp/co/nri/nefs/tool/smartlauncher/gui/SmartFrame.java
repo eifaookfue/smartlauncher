@@ -27,6 +27,8 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -218,15 +220,30 @@ public class SmartFrame extends JFrame {
 		});
 
 		// 4行目
+		// https://ateraimemo.com/Swing/ButtonWidth.html
 		JButton okButton = new JButton("OK");
+		okButton.addActionListener(new ExecuteAction(this, table));
+		okButton.setPreferredSize(new Dimension(120, 30));
 		JButton cancelButton = new JButton("Cancel");
-		okButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
-		cancelButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		cancelButton.addActionListener(new EscAction(this));
+		cancelButton.setPreferredSize(new Dimension(120, 30));
+		/*okButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		cancelButton.setAlignmentX(Component.LEFT_ALIGNMENT);*/
 
-		JPanel p4 = new JPanel();
-		p4.setLayout(new BoxLayout(p4, BoxLayout.LINE_AXIS));
-		p4.add(okButton);
-		p4.add(cancelButton);
+		// BoxLayout.Y_AXIS 上から下にコンポーネントを配置
+		// BoxLayout.LINE_AXISの場合が「左から右」
+		// BoxLayout.PAGE_AXISの場合が「上から下」
+		/*JPanel p4 = new JPanel();
+		p4.setLayout(new BoxLayout(p4, BoxLayout.Y_AXIS));
+		p4.add(okButton);*/
+
+		Box box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
+		box.add(okButton);
+		box.add(Box.createHorizontalStrut(20));
+		box.add(cancelButton);
+		box.setBorder(BorderFactory.createEmptyBorder(5,0,5,30));
+
 
 		// 縦のBoxLayout
 		JPanel panelV = new JPanel();
@@ -234,7 +251,8 @@ public class SmartFrame extends JFrame {
 		panelV.add(textField);
 		panelV.add(c2);
 		panelV.add(sp);
-		panelV.add(p4);
+		//panelV.add(p4);
+		panelV.add(box);
 
 		c.add(panelV);
 
