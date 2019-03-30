@@ -38,9 +38,13 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 
+import jp.co.nri.nefs.tool.smartlauncher.action.EscAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ExecuteAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ShiftTabAction;
 import jp.co.nri.nefs.tool.smartlauncher.data.DataModelUpdater;
@@ -50,6 +54,7 @@ public class SmartFrame extends JFrame {
 	private Image image;
 	private FileListCreator creator;
 	private Path directoryFile;
+	private static Logger logger = LoggerFactory.getLogger(SmartFrame.class);
 
 	public SmartFrame() {
 		directoryFile = Paths.get(
@@ -91,6 +96,13 @@ public class SmartFrame extends JFrame {
 	private void initCloseOperation() {
 		// 登録されている任意の WindowListener オブジェクトを呼び出したあとで、自動的にフレームを隠す
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+
+		// EscでフレームをInvisible
+		String sfEsc = "SF_ESC";
+		KeyStroke esc = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+		getRootPane().getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(esc, sfEsc);
+		getRootPane().getActionMap().put(sfEsc, new EscAction(this));
+
 	}
 
 	private void initTitle() {
@@ -148,13 +160,18 @@ public class SmartFrame extends JFrame {
 		JTable table = new JTable(tableModel);
 		table.setDefaultRenderer(File.class, new MyRenderer());
 		table.setDefaultEditor(Object.class, null);
-		final String solve = "Solve";
+
+		// Enter押下で実行
+		final String sfEnter = "SF_ENTER";
 		KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-		table.getActionMap().put(solve, new ExecuteAction(this, table));
+		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, sfEnter);
+		table.getActionMap().put(sfEnter, new ExecuteAction(this, table));
+
+		// Tabで
 		KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK);
-		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(tab, "TTT");
-		table.getActionMap().put("TTT", new ShiftTabAction(textField));
+		final String sfShiftTab = "SF_SHIFT_TAB";
+		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(tab, sfShiftTab);
+		table.getActionMap().put(sfShiftTab, new ShiftTabAction(textField));
 
 		table.setRowHeight(25);
 		table.setShowHorizontalLines(false);
@@ -185,18 +202,15 @@ public class SmartFrame extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Down pressed.");
 				table.requestFocus();
 			}
 		});
-		//Arrays.stream(textField.getActionMap().allKeys()).forEach(System.out::println);
-		//textField.getActionMap().get("insert-content").actionPerformed(new ActionEvent(null, null, null));
 
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					table.getActionMap().get(solve)
+					table.getActionMap().get(sfEnter)
 							.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
 				}
 			}
@@ -286,7 +300,7 @@ public class SmartFrame extends JFrame {
 			public void onHotKey(int paramInt) {
 				if (paramInt == 1){
 					frame.setVisible(true);
-					System.out.println("called");
+					logger.info("HotKey called.");
 				}
 
 			}
