@@ -20,11 +20,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -54,38 +53,22 @@ import jp.co.nri.nefs.tool.smartlauncher.action.ExecuteAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ExplorerAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ShiftTabAction;
 import jp.co.nri.nefs.tool.smartlauncher.data.DataModelUpdater;
-import jp.co.nri.nefs.tool.smartlauncher.data.FileListCreator;
+import jp.co.nri.nefs.tool.smartlauncher.data.ScheduledCreator;
 
 public class SmartFrame extends JFrame {
 	private Image image;
-	private FileListCreator creator;
-	private Path directoryFile;
+	private ScheduledCreator creator;
+	private Path directoryPath;
 	// 当初はOptionalを利用しようと考えたが、ラムダ式のなかでExceptionをハンドリング
 	// するとネストが深くなりすぎて汚くなるのでやめる。
-	private Path aliasFile = null;
+	private Path aliasPath = null;
 	private static Logger logger = LoggerFactory.getLogger(SmartFrame.class);
 
-	public SmartFrame() {
-		ClassLoader loader = SmartFrame.class.getClassLoader();
-		try {
-			directoryFile = Paths.get(loader
-					.getResource("cfgs/searchdir.csv")
-					.toURI()
-					);
-			logger.info("{} has loaded.", directoryFile);
-		} catch (URISyntaxException e) {
-			throw new ExceptionInInitializerError(e);
-		}
-
-		URL url = loader.getResource("cfgs/alias.csv");
-		if (url != null){
-			try {
-				aliasFile = Paths.get(url.toURI());
-			} catch (URISyntaxException e) {
-				logger.warn("", e);
-			}
-		}
-
+	public SmartFrame(String directoryFile, String aliasFile) {
+		Objects.requireNonNull(directoryFile, "directoryPath is required.");
+		directoryPath = Paths.get(directoryFile);
+		if (aliasFile != null)
+			aliasPath = Paths.get(aliasFile);
 	}
 
 	private void init() {
@@ -191,13 +174,14 @@ public class SmartFrame extends JFrame {
 		JScrollPane sp = new JScrollPane(table);
 		sp.setPreferredSize(new Dimension(1000, 500));
 
-		DataModelUpdater dataModelUpdater = new DataModelUpdater(table, tableModel, textField, aliasFile);
+		DataModelUpdater dataModelUpdater = new DataModelUpdater(table, tableModel, textField);
 		MyDocumentListener documentListener = new MyDocumentListener(dataModelUpdater);
 		textField.getDocument().addDocumentListener(documentListener);
 
-		creator = new FileListCreator(dataModelUpdater, directoryFile);
+		creator = new ScheduledCreator(dataModelUpdater, directoryPath, aliasPath);
 		try {
 			//初期化
+			dataModelUpdater.replaceAlias(creator.createAlias());
 			dataModelUpdater.replaceList(creator.createList());
 			dataModelUpdater.update();
 		} catch (IOException e1) {
@@ -330,7 +314,18 @@ public class SmartFrame extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		SmartFrame frame = new SmartFrame();
+
+		String directoryFile = null;
+		String aliasFile = null;
+		for (int i = 0; i < args.length; ++i){
+			if ("-directoryFile".equals(args[i])){
+				directoryFile = args[++i];
+			} else if ("-aliasFile".equals(args[i])) {
+				aliasFile = args[++i];
+			}
+		}
+
+		SmartFrame frame = new SmartFrame(directoryFile, aliasFile);
 		frame.init();
 		frame.pack();
 

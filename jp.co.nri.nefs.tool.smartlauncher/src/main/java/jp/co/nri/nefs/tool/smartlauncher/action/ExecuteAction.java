@@ -43,7 +43,7 @@ public class ExecuteAction extends AbstractAction {
 		int columnIndex = table.getSelectedColumn();
 		File f = (File) table.getModel().getValueAt(rowIndex, columnIndex);
 
-		ProcessBuilder pb = new ProcessBuilder("cscript", script, f.getPath());
+		ProcessBuilder pb = new ProcessBuilder("cscript", script, '"' + f.getPath() + '"');
 		String called = pb.command().stream().collect(Collectors.joining(" "));
 		logger.info("called {}", called);
 

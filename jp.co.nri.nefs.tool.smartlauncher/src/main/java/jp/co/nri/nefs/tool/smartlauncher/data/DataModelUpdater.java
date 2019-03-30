@@ -1,14 +1,10 @@
 package jp.co.nri.nefs.tool.smartlauncher.data;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -28,22 +24,11 @@ public class DataModelUpdater {
 	private Map<String, String> alias = null;
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	public DataModelUpdater(JTable table, DefaultTableModel tableModel, JTextField textField, Path aliasFile) {
+	public DataModelUpdater(JTable table, DefaultTableModel tableModel, JTextField textField) {
 		this.table = table;
 		this.tableModel = tableModel;
 		this.textField = textField;
 
-		if (aliasFile != null) {
-			try {
-				alias = Files.readAllLines(aliasFile).stream().map(line -> line.split(","))
-					.collect(Collectors.toMap(
-						lines -> lines[0],
-						lines -> lines[1]
-								));
-			} catch (IOException e) {
-				logger.warn("", e);
-			}
-		}
 	}
 
 	public void replaceList(List<File> newList) {
@@ -52,6 +37,11 @@ public class DataModelUpdater {
 		});
 	}
 
+	public void replaceAlias(Map<String, String> newMap){
+		SwingUtilities.invokeLater(() -> {
+			this.alias = newMap;
+		});
+	}
 
 	public void update() {
 		// いったん全部TableModelから削除

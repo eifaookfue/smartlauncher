@@ -6,7 +6,7 @@ path = WScript.Arguments(0)
 
 fileName = fso.GetFileName(path)
 ext = fso.GetExtensionName(path)
-command = "cmd /c " & path
+command = "cmd /c " & """" & path & """"
 'msgbox command
 
 If ext = "xlsx" or ext = "xls" Then
@@ -37,8 +37,8 @@ private Sub excelSpecial()
 		End If
 	End If
 End Sub
-	
-		
+
+
 
 'shell.AppActivate("ïîïi.xlsx")
 'xl.WorkBooks("ç\ê¨.xlsx").Activate
