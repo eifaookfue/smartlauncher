@@ -12,6 +12,8 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -81,7 +83,6 @@ public class SmartFrame extends JFrame {
 				logger.warn("", e);
 			}
 		}
-
 
 	}
 
@@ -167,6 +168,13 @@ public class SmartFrame extends JFrame {
 	private JTable initPane(Container c) {
 		// 1行目
 		JTextField textField = new JTextField(10);
+		// Frameを表示したときに全選択
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				textField.selectAll();
+			}
+		});
 
 		// 2行目
 		JLabel c2 = new JLabel(" ");
@@ -190,6 +198,8 @@ public class SmartFrame extends JFrame {
 		KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, sfEnter);
 		table.getActionMap().put(sfEnter, new ExecuteAction(this, table));
+		textField.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, sfEnter);
+		textField.getActionMap().put(sfEnter, new ExecuteAction(this, table));
 
 		// Tabで
 		KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK);
