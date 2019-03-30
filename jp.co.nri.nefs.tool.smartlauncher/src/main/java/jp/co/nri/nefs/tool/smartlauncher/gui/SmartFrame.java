@@ -18,6 +18,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
@@ -54,11 +56,33 @@ public class SmartFrame extends JFrame {
 	private Image image;
 	private FileListCreator creator;
 	private Path directoryFile;
+	// 当初はOptionalを利用しようと考えたが、ラムダ式のなかでExceptionをハンドリング
+	// するとネストが深くなりすぎて汚くなるのでやめる。
+	private Path aliasFile = null;
 	private static Logger logger = LoggerFactory.getLogger(SmartFrame.class);
 
 	public SmartFrame() {
-		directoryFile = Paths.get(
-				"C:\\Users\\s2-nakamura\\git\\smartlauncher\\jp.co.nri.nefs.tool.smartlauncher\\conf\\searchdir.txt");
+		ClassLoader loader = SmartFrame.class.getClassLoader();
+		try {
+			directoryFile = Paths.get(loader
+					.getResource("cfgs/searchdir.csv")
+					.toURI()
+					);
+			logger.info("{} has loaded.", directoryFile);
+		} catch (URISyntaxException e) {
+			throw new ExceptionInInitializerError(e);
+		}
+
+		URL url = loader.getResource("cfgs/alias.csv");
+		if (url != null){
+			try {
+				aliasFile = Paths.get(url.toURI());
+			} catch (URISyntaxException e) {
+				logger.warn("", e);
+			}
+		}
+
+
 	}
 
 	private void init() {
@@ -179,7 +203,7 @@ public class SmartFrame extends JFrame {
 		JScrollPane sp = new JScrollPane(table);
 		sp.setPreferredSize(new Dimension(1000, 500));
 
-		DataModelUpdater dataModelUpdater = new DataModelUpdater(table, tableModel, textField);
+		DataModelUpdater dataModelUpdater = new DataModelUpdater(table, tableModel, textField, aliasFile);
 		MyDocumentListener documentListener = new MyDocumentListener(dataModelUpdater);
 		textField.getDocument().addDocumentListener(documentListener);
 
