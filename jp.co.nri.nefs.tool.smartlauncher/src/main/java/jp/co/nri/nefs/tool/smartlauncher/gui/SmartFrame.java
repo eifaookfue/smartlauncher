@@ -122,6 +122,7 @@ public class SmartFrame extends JFrame {
 	}
 
 	private void initSizeAndLocation() {
+		//setPreferredSize(new Dimension(1000, 500));
 		setSize(1000, 500);
 		setLocationRelativeTo(null);
 	}
@@ -171,9 +172,14 @@ public class SmartFrame extends JFrame {
 		table.getActionMap().put(sfShiftTab, new ShiftTabAction(textField));
 
 		table.setRowHeight(25);
+		// 枠線非表示
 		table.setShowHorizontalLines(false);
+		// ヘッダ非表示
+		table.setTableHeader(null);
 
-		JScrollPane sp = new JScrollPane(table);
+		JScrollPane sp = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		//table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		//table.setPreferredSize(new Dimension(1000, 500));
 		sp.setPreferredSize(new Dimension(1000, 500));
 
 		DataModelUpdater dataModelUpdater = new DataModelUpdater(table, tableModel, textField);
