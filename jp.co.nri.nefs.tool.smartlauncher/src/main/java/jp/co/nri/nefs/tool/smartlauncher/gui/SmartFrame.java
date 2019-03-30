@@ -37,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -50,6 +51,7 @@ import com.melloware.jintellitype.JIntellitype;
 
 import jp.co.nri.nefs.tool.smartlauncher.action.EscAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ExecuteAction;
+import jp.co.nri.nefs.tool.smartlauncher.action.ExplorerAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ShiftTabAction;
 import jp.co.nri.nefs.tool.smartlauncher.data.DataModelUpdater;
 import jp.co.nri.nefs.tool.smartlauncher.data.FileListCreator;
@@ -139,32 +141,6 @@ public class SmartFrame extends JFrame {
 		setLocationRelativeTo(null);
 	}
 
-	private class MyRenderer extends DefaultTableCellRenderer {
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-
-			JLabel rendComp = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-					column);
-			File file = (File) value;
-			String text = file.getName() + " - " + file.getParent();
-			rendComp.setText(text);
-			return rendComp;
-		}
-	}
-
-	private class MyTableModel extends DefaultTableModel {
-
-		public MyTableModel(String[] columnNames, int rowCount) {
-			super(columnNames, rowCount);
-		}
-
-		@Override
-		public Class<?> getColumnClass(int columnIndex) {
-			return File.class;
-		}
-	}
-
 	private JTable initPane(Container c) {
 		// 1行目
 		JTextField textField = new JTextField(10);
@@ -181,17 +157,10 @@ public class SmartFrame extends JFrame {
 
 		// 3行目
 		MyTableModel tableModel = new MyTableModel(new String[] { "file" }, 0);
-
-
-		/*fileList.stream().map(f -> {
-			File[] fileArray = new File[1];
-			fileArray[0] = f;
-			return fileArray;
-		}).forEach(tableModel::addRow);*/
-
 		JTable table = new JTable(tableModel);
 		table.setDefaultRenderer(File.class, new MyRenderer());
 		table.setDefaultEditor(Object.class, null);
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		// Enter押下で実行
 		final String sfEnter = "SF_ENTER";
@@ -201,7 +170,16 @@ public class SmartFrame extends JFrame {
 		textField.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, sfEnter);
 		textField.getActionMap().put(sfEnter, new ExecuteAction(this, table));
 
-		// Tabで
+		// Shift+Enter押下でExplorer起動
+		final String sfShiftEnter = "SF_SHIFT_ENTER";
+		KeyStroke shiftEnter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_MASK);
+		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(shiftEnter, sfShiftEnter);
+		table.getActionMap().put(sfShiftEnter, new ExplorerAction(this, table));
+		textField.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(shiftEnter, sfShiftEnter);
+		textField.getActionMap().put(sfShiftEnter, new ExplorerAction(this, table));
+
+
+		// Shift+TabでTextFieldに戻る
 		KeyStroke tab = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK);
 		final String sfShiftTab = "SF_SHIFT_TAB";
 		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(tab, sfShiftTab);
@@ -229,10 +207,10 @@ public class SmartFrame extends JFrame {
 
 		creator.start();
 
-
 		KeyStroke down = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
-		textField.getInputMap(JTextField.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(down, "ABC");
-		textField.getActionMap().put("ABC", new AbstractAction() {
+		String sfDown = "SF_DOWN";
+		textField.getInputMap(JTextField.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(down, sfDown);
+		textField.getActionMap().put(sfDown, new AbstractAction() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -240,12 +218,17 @@ public class SmartFrame extends JFrame {
 			}
 		});
 
+		// ダブルクリックのときはEnterと同じ動作
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					table.getActionMap().get(sfEnter)
+					if ( (e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) != 0 )
+						table.getActionMap().get(sfShiftEnter)
 							.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
+					else
+						table.getActionMap().get(sfEnter)
+						.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
 				}
 			}
 		});
@@ -318,6 +301,32 @@ public class SmartFrame extends JFrame {
 			e.printStackTrace();
 		}
 
+	}
+
+	private class MyRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+
+			JLabel rendComp = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+					column);
+			File file = (File) value;
+			String text = file.getName() + " - " + file.getParent();
+			rendComp.setText(text);
+			return rendComp;
+		}
+	}
+
+	private class MyTableModel extends DefaultTableModel {
+
+		public MyTableModel(String[] columnNames, int rowCount) {
+			super(columnNames, rowCount);
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return File.class;
+		}
 	}
 
 	public static void main(String[] args) {
