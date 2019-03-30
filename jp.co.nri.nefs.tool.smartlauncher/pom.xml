@@ -33,6 +33,9 @@ pache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<descriptors>
+						<descriptor>src/assembly/src.xml</descriptor>
+					</descriptors>
 				</configuration>
 				<executions>
 					<execution>
