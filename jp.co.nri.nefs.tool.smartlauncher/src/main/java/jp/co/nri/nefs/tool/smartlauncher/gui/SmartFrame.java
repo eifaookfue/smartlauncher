@@ -64,13 +64,15 @@ public class SmartFrame extends JFrame {
 	// 当初はOptionalを利用しようと考えたが、ラムダ式のなかでExceptionをハンドリング
 	// するとネストが深くなりすぎて汚くなるのでやめる。
 	private Path aliasPath = null;
+	private String script;
 	private static Logger logger = LoggerFactory.getLogger(SmartFrame.class);
 
-	public SmartFrame(String directoryFile, String aliasFile) {
+	public SmartFrame(String directoryFile, String aliasFile, String script) {
 		Objects.requireNonNull(directoryFile, "directoryPath is required.");
 		directoryPath = Paths.get(directoryFile);
 		if (aliasFile != null)
 			aliasPath = Paths.get(aliasFile);
+		this.script = script;
 	}
 
 	private void init() {
@@ -128,6 +130,8 @@ public class SmartFrame extends JFrame {
 	}
 
 	private JTable initPane(Container c) {
+
+
 		// 1行目
 		JTextField textField = new JTextField(10);
 		// Frameを表示したときに全選択
@@ -152,9 +156,10 @@ public class SmartFrame extends JFrame {
 		final String sfEnter = "SF_ENTER";
 		KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 		table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, sfEnter);
-		table.getActionMap().put(sfEnter, new ExecuteAction(this, table));
+		ExecuteAction executeAction = new ExecuteAction(this, table, script);
+		table.getActionMap().put(sfEnter, executeAction);
 		textField.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, sfEnter);
-		textField.getActionMap().put(sfEnter, new ExecuteAction(this, table));
+		textField.getActionMap().put(sfEnter, executeAction);
 
 		// Shift+Enter押下でExplorer起動
 		final String sfShiftEnter = "SF_SHIFT_ENTER";
@@ -228,7 +233,7 @@ public class SmartFrame extends JFrame {
 		// 4行目
 		// https://ateraimemo.com/Swing/ButtonWidth.html
 		JButton okButton = new JButton("OK");
-		okButton.addActionListener(new ExecuteAction(this, table));
+		okButton.addActionListener(executeAction);
 		okButton.setPreferredSize(new Dimension(120, 30));
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new EscAction(this));
@@ -341,15 +346,23 @@ public class SmartFrame extends JFrame {
 
 		String directoryFile = null;
 		String aliasFile = null;
+		String scriptFile = null;
+
+		if (args.length == 0){
+			System.out.println("-directoryFile directoryFile -scriptFile scriptFile [-aliasFile aliasFile]");
+		}
+
 		for (int i = 0; i < args.length; ++i){
 			if ("-directoryFile".equals(args[i])){
 				directoryFile = args[++i];
 			} else if ("-aliasFile".equals(args[i])) {
 				aliasFile = args[++i];
+			} else if ("-scriptFile".equals(args[i])) {
+				scriptFile = args[++i];
 			}
 		}
 
-		SmartFrame frame = new SmartFrame(directoryFile, aliasFile);
+		SmartFrame frame = new SmartFrame(directoryFile, aliasFile, scriptFile);
 		frame.init();
 		frame.pack();
 

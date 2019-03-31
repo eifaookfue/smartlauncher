@@ -3,8 +3,6 @@ package jp.co.nri.nefs.tool.smartlauncher.action;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
@@ -22,19 +20,10 @@ public class ExecuteAction extends AbstractAction {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private String script;
 
-	public ExecuteAction(JFrame frame, JTable table) {
+	public ExecuteAction(JFrame frame, JTable table, String script) {
 		this.frame = frame;
 		this.table = table;
-		try {
-			script = Paths.get(
-					ExecuteAction.class.getClassLoader()
-					.getResource("scripts/activate.vbs")
-					.toURI()
-					).toString();
-		} catch (URISyntaxException e) {
-			logger.warn("", e);
-		}
-
+		this.script = script;
 	}
 
 	@Override
