@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/jp.co.nri.nefs.tool.smartlauncher/src/main/java/jp/co/nri/nefs/tool/smartlauncher/gui/SmartFrame.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="jp.co.nri.nefs.tool.smartlauncher.gui.SmartFrame"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-directoryFile C:\Users\s2-nakamura\git\smartlauncher\jp.co.nri.nefs.tool.smartlauncher\cfgs\searchdir.txt -aliasFile C:\Users\s2-nakamura\git\smartlauncher\jp.co.nri.nefs.tool.smartlauncher\cfgs\alias.txt -scriptFile C:\Users\s2-nakamura\git\smartlauncher\jp.co.nri.nefs.tool.smartlauncher\src\main\resources\scripts\activate.vbs"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="jp.co.nri.nefs.tool.smartlauncher"/>
+<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
+</launchConfiguration>
