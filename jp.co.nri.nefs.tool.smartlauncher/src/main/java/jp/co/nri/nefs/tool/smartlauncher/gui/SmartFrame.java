@@ -1,6 +1,7 @@
 package jp.co.nri.nefs.tool.smartlauncher.gui;
 
 import java.awt.AWTException;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -22,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Objects;
 
@@ -40,6 +43,9 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -53,19 +59,19 @@ import com.melloware.jintellitype.JIntellitype;
 import jp.co.nri.nefs.tool.smartlauncher.action.EscAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ExecuteAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ExplorerAction;
+import jp.co.nri.nefs.tool.smartlauncher.action.ReloadAction;
 import jp.co.nri.nefs.tool.smartlauncher.action.ShiftTabAction;
 import jp.co.nri.nefs.tool.smartlauncher.data.DataModelUpdater;
-import jp.co.nri.nefs.tool.smartlauncher.data.ScheduledCreator;
 
 public class SmartFrame extends JFrame {
 	private Image image;
-	private ScheduledCreator creator;
 	private Path directoryPath;
 	// 当初はOptionalを利用しようと考えたが、ラムダ式のなかでExceptionをハンドリング
 	// するとネストが深くなりすぎて汚くなるのでやめる。
 	private Path aliasPath = null;
 	private String script;
 	private static Logger logger = LoggerFactory.getLogger(SmartFrame.class);
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
 	public SmartFrame(String directoryFile, String aliasFile, String script) {
 		Objects.requireNonNull(directoryFile, "directoryPath is required.");
@@ -191,19 +197,6 @@ public class SmartFrame extends JFrame {
 		MyDocumentListener documentListener = new MyDocumentListener(dataModelUpdater);
 		textField.getDocument().addDocumentListener(documentListener);
 
-		creator = new ScheduledCreator(dataModelUpdater, directoryPath, aliasPath);
-		try {
-			//初期化
-			dataModelUpdater.replaceAlias(creator.createAlias());
-			dataModelUpdater.replaceList(creator.createList());
-			dataModelUpdater.update();
-		} catch (IOException e1) {
-			// TODO 自動生成された catch ブロック
-			e1.printStackTrace();
-		}
-
-		creator.start();
-
 		KeyStroke down = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
 		String sfDown = "SF_DOWN";
 		textField.getInputMap(JTextField.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(down, sfDown);
@@ -230,8 +223,37 @@ public class SmartFrame extends JFrame {
 			}
 		});
 
+		// 行選択でラベルにファイルの詳細を表示
+		JLabel label = new JLabel();
+		label.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		//label.setPreferredSize(new Dimension(1000, 500));
+		LineBorder border = new LineBorder(Color.BLACK, 1, false);
+		label.setBorder(border);
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting())
+					return;
+				int rowIndex = table.getSelectedRow();
+				int columnIndex = table.getSelectedColumn();
+				File f = (File) table.getModel().getValueAt(rowIndex, columnIndex);
+				Date date = new Date(f.lastModified());
+				String s = "更新日時: " + sdf.format(date) + "   サイズ: " + f.length();
+				label.setText(s);
+			}
+		});
+
 		// 4行目
 		// https://ateraimemo.com/Swing/ButtonWidth.html
+		JButton reloadButton = new JButton("Reload");
+		ReloadAction reloadAction = new ReloadAction(this, dataModelUpdater, directoryPath, aliasPath);
+		reloadButton.addActionListener(reloadAction);
+		reloadButton.setPreferredSize(new Dimension(120, 30));
+		// 一度呼ぶ
+		reloadAction.doActionPerformed();
+		dataModelUpdater.update();
+
 		JButton okButton = new JButton("OK");
 		okButton.addActionListener(executeAction);
 		okButton.setPreferredSize(new Dimension(120, 30));
@@ -250,6 +272,8 @@ public class SmartFrame extends JFrame {
 
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
+		box.add(reloadButton);
+		box.add(Box.createHorizontalStrut(20));
 		box.add(okButton);
 		box.add(Box.createHorizontalStrut(20));
 		box.add(cancelButton);
@@ -263,6 +287,7 @@ public class SmartFrame extends JFrame {
 		panelV.add(c2);
 		panelV.add(sp);
 		//panelV.add(p4);
+		panelV.add(label);
 		panelV.add(box);
 
 		c.add(panelV);
@@ -298,7 +323,6 @@ public class SmartFrame extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				creator.stop();
 				tray.remove(icon);
 				JIntellitype.getInstance().cleanUp();
 				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -365,7 +389,7 @@ public class SmartFrame extends JFrame {
 		SmartFrame frame = new SmartFrame(directoryFile, aliasFile, scriptFile);
 		frame.init();
 		frame.pack();
-
+		frame.setVisible(true);
 
 		//JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_SHIFT, (int)'B');
 		JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_CONTROL + JIntellitype.MOD_SHIFT, KeyEvent.VK_5);
