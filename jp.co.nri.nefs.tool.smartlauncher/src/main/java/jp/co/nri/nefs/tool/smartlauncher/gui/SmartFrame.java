@@ -225,7 +225,6 @@ public class SmartFrame extends JFrame {
 
 		// 行選択でラベルにファイルの詳細を表示
 		JLabel label = new JLabel();
-		label.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		//label.setPreferredSize(new Dimension(1000, 500));
 		LineBorder border = new LineBorder(Color.BLACK, 1, false);
 		label.setBorder(border);
