@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -139,7 +140,15 @@ public class SmartFrame extends JFrame {
 
 
 		// 1行目
-		JTextField textField = new JTextField(10);
+		Box expBox = Box.createHorizontalBox();
+
+		JLabel explanation = new JLabel("ファイル名の一部を入力してください。スペースを空けて入力することでAND検索も可能です。");
+		expBox.add(explanation);
+		expBox.add(Box.createHorizontalGlue());
+
+		JTextField textField = new JTextField();
+		// これをしておかないとフレームを大きくしたときにtextFieldの高さが大きくなってしまう
+		textField.setMaximumSize(new Dimension(Short.MAX_VALUE, textField.getPreferredSize().height));
 		// Frameを表示したときに全選択
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -224,10 +233,17 @@ public class SmartFrame extends JFrame {
 		});
 
 		// 行選択でラベルにファイルの詳細を表示
+		Box fileDetailBox = Box.createHorizontalBox();
+		//bbb.setLayout(new BoxLayout(bbb, BoxLayout.X_AXIS));
+
 		JLabel label = new JLabel();
 		//label.setPreferredSize(new Dimension(1000, 500));
-		LineBorder border = new LineBorder(Color.BLACK, 1, false);
-		label.setBorder(border);
+		//label.setPreferredSize(new Dimension(900, 40));
+		fileDetailBox.add(label);
+		fileDetailBox.add(Box.createHorizontalGlue());
+		LineBorder border = new LineBorder(Color.GRAY, 1, false);
+
+		fileDetailBox.setBorder(border);
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
 			@Override
@@ -236,9 +252,14 @@ public class SmartFrame extends JFrame {
 					return;
 				int rowIndex = table.getSelectedRow();
 				int columnIndex = table.getSelectedColumn();
+				if (rowIndex < 0 || columnIndex < 0)
+					return;
+
 				File f = (File) table.getModel().getValueAt(rowIndex, columnIndex);
 				Date date = new Date(f.lastModified());
-				String s = "更新日時: " + sdf.format(date) + "   サイズ: " + f.length();
+				String size = NumberFormat.getNumberInstance().format(f.length());
+				String s = f.getName() +  "  更新日時: " + sdf.format(date)
+				+ "   サイズ: " + size + " byte";
 				label.setText(s);
 			}
 		});
@@ -279,17 +300,28 @@ public class SmartFrame extends JFrame {
 		box.setBorder(BorderFactory.createEmptyBorder(5,0,5,30));
 
 
+		JPanel panelW = new JPanel();
+		//https://docs.oracle.com/javase/jp/8/docs/api/javax/swing/BoxLayout.html
+		//BoxLayoutは列のすべてのコンポーネントの幅を最大幅に揃えるよう試行します。
+		panelW.setLayout(new BoxLayout(panelW, BoxLayout.X_AXIS));
+		panelW.add(Box.createHorizontalStrut(10));
 		// 縦のBoxLayout
 		JPanel panelV = new JPanel();
 		panelV.setLayout(new BoxLayout(panelV, BoxLayout.PAGE_AXIS));
+		panelV.add(expBox);
 		panelV.add(textField);
 		panelV.add(c2);
 		panelV.add(sp);
+		panelV.add(Box.createVerticalStrut(5));
 		//panelV.add(p4);
-		panelV.add(label);
+		//panelV.add(label);
+		panelV.add(fileDetailBox);
+		panelV.add(Box.createVerticalStrut(10));
 		panelV.add(box);
+		panelW.add(panelV);
+		panelW.add(Box.createHorizontalStrut(10));
 
-		c.add(panelV);
+		c.add(panelW);
 
 		return table;
 
