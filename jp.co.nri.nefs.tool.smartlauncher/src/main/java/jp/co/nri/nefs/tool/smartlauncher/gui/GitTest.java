@@ -5,5 +5,6 @@ public class GitTest {
 	public void Test(){
 		System.out.println("master");
 		System.out.println("feature");
+		System.out.println("master2");
 	}
 }
